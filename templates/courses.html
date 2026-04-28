@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Courses{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Course Management</h3>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">Add New Course</button>
+</div>
+
+<div class="card-custom">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Course Name</th>
+                <th>Teacher</th>
+                <th>Degree</th>
+                <th>Credits</th>
+                <th>Description</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in courses %}
+            <tr>
+                <td>{{ s['course_id'] }}</td>
+                <td><strong>{{ s['course_name'] }}</strong></td>
+                <td>{{ s['teacher_name'] or 'No Teacher' }}</td>
+                <td>{{ s['degree'] }}</td>
+                <td>{{ s['credits'] }}</td>
+                <td>{{ s['description'] }}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                        data-bs-target="#edit{{ s['course_id'] }}">Edit</button>
+                    <form action="/courses/{{ s['course_id'] }}/delete" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger"
+                            onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% for s in courses %}
+<div class="modal fade" id="edit{{ s['course_id'] }}" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="/courses/{{ s['course_id'] }}/update" method="POST" class="modal-content">
+            <div class="modal-header">
+                <h5>Update course</h5>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="course_id" value="{{ s['course_id'] }}">
+                <div class="mb-3"><input type="text" name="name" class="form-control" value="{{ s['course_name'] }}"
+                        required></div>
+                <div class="mb-3">
+                    <select name="teacher_id" class="form-control" required>
+                        <option value="">Select Teacher</option>
+                        {% for teacher in teachers %}
+                        <option value="{{ teacher['teacher_id'] }}" {% if teacher['teacher_id']==s['teacher_id']
+                            %}selected{% endif %}>
+                            {{ teacher['name'] }} ({{ teacher['degree'] }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3"><input type="number" name="credits" class="form-control" placeholder="Credits" value="{{ s['credits'] }}"
+                        required></div>
+                <div class="mb-3"><textarea name="description" class="form-control"
+                        placeholder="Description">{{ s['description'] }}</textarea></div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="/courses" method="POST" class="modal-content">
+            <div class="modal-header">
+                <h5>Add course</h5>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3"><input type="text" name="name" class="form-control" placeholder="Course Name"
+                        required></div>
+                <div class="mb-3">
+                    <select name="teacher_id" class="form-control" required>
+                        <option value="">Select Teacher</option>
+                        {% for teacher in teachers %}
+                        <option value="{{ teacher['teacher_id'] }}">
+                            {{ teacher['name'] }} ({{ teacher['degree'] }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3"><input type="number" name="credits" class="form-control" placeholder="Credits"
+                        required></div>
+                <div class="mb-3"><textarea name="description" class="form-control"
+                        placeholder="Description"></textarea></div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Save course</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

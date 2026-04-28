@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Students{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Student Management</h3>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">Add New Student</button>
+</div>
+
+<div class="card-custom">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Date of Birth</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in students %}
+            <tr>
+                <td>{{ s['student_id'] }}</td>
+                <td><strong>{{ s['name'] }}</strong></td>
+                <td>{{ s['age'] }}</td>
+                <td>{{ s['date_of_birth'] }}</td>
+                <td>{{ s['email'] }}</td>
+                <td>{{ s['phone'] }}</td>
+                <td>{{ s['address'] }}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                        data-bs-target="#edit{{ s['student_id'] }}">Edit</button>
+                    <form action="/students/{{ s['student_id'] }}/delete" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger"
+                            onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% for s in students %}
+<div class="modal fade" id="edit{{ s['student_id'] }}" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="/students/{{ s['student_id'] }}/update" method="POST" class="modal-content">
+            <div class="modal-header">
+                <h5>Update Student</h5>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="student_id" value="{{ s['student_id'] }}">
+                <div class="mb-3"><input type="text" name="name" class="form-control" value="{{ s['name'] }}" required>
+                </div>
+                <div class="mb-3"><input type="number" name="age" class="form-control" value="{{ s['age'] }}" required></div>
+                <div class="mb-3"><input type="date" name="date_of_birth"
+                        value="{{ s['date_of_birth'][:10] if s['date_of_birth'] else '' }}"></div>
+                <div class="mb-3"><input type="email" name="email" class="form-control" value="{{ s['email'] }}"></div>
+                <div class="mb-3"><input type="text" name="phone" class="form-control" value="{{ s['phone'] }}"
+                        placeholder="Phone"></div>
+                <div class="mb-3"><input type="text" name="address" class="form-control" value="{{ s['address'] }}">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="/students" method="POST" class="modal-content">
+            <div class="modal-header">
+                <h5>Add Student</h5>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3"><input type="text" name="name" class="form-control" placeholder="Name" required></div>
+                <div class="mb-3"><input type="number" name="age" class="form-control" placeholder="Age" required></div>
+                <div class="mb-3"><input type="date" name="date_of_birth" class="form-control"
+                        placeholder="Date of Birth"></div>
+                <div class="mb-3"><input type="email" name="email" class="form-control" placeholder="Email"></div>
+                <div class="mb-3"><input type="text" name="phone" class="form-control" placeholder="Phone"></div>
+                <div class="mb-3"><input type="text" name="address" class="form-control" placeholder="Address"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Save Student</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

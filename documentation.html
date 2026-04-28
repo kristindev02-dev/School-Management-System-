@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Management System Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+            line-height: 1.6;
+            background-color: #f4f4f9;
+            color: #222;
+        }
+        header {
+            margin-bottom: 24px;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 12px;
+        }
+        h1, h2, h3 {
+            color: #123;
+        }
+        section {
+            margin-bottom: 28px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        code {
+            display: block;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        ul {
+            margin: 10px 0 16px 20px;
+        }
+        .note {
+            border-left: 4px solid #0078d7;
+            padding-left: 12px;
+            margin: 14px 0;
+            background: #eef6ff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>School Management System Documentation</h1>
+        <p>This page explains the three main files in the project: <strong>app.py</strong>, <strong>templates/base.html</strong>, and <strong>templates/students.html</strong>.</p>
+    </header>
+
+    <section>
+        <h2>1. app.py</h2>
+        <p><strong>app.py</strong> is the Python program that runs the web server and talks to the database.</p>
+        <h3>What it does</h3>
+        <ul>
+            <li>Creates the Flask application.</li>
+            <li>Connects to the MySQL database using a connection pool.</li>
+            <li>Defines routes for the website pages.</li>
+            <li>Handles adding, updating, deleting, and showing student records.</li>
+        </ul>
+        <h3>Key parts</h3>
+        <p><strong>Imports:</strong></p>
+        <code>import mysql.connector
+from mysql.connector import pooling
+from flask import Flask, redirect, render_template, request, url_for</code>
+        <p>This loads the tools needed for database connections and Flask web handling.</p>
+        <p><strong>Creating the app:</strong></p>
+        <code>app = Flask(__name__, template_folder='templates', static_folder='static')</code>
+        <p>This tells Flask where the HTML templates and static files (like CSS) are located.</p>
+        <p><strong>Database pool:</strong></p>
+        <code>db_pool = pooling.MySQLConnectionPool(...)</code>
+        <p>The connection pool keeps database connections ready so the app can handle requests smoothly.</p>
+        <p><strong>Routes:</strong></p>
+        <ul>
+            <li><code>@app.route('/')</code> — home route, sends users to the student page.</li>
+            <li><code>@app.get('/students')</code> — loads the student list and the form page.</li>
+            <li><code>@app.post('/students')</code> — saves a new student when the form is submitted.</li>
+            <li><code>@app.post('/students/&lt;int:student_id&gt;/update')</code> — updates an existing student.</li>
+            <li><code>@app.post('/students/&lt;int:student_id&gt;/delete')</code> — deletes a student.</li>
+        </ul>
+        <p>Each route uses a function to do work, then returns either a page or a redirect back to the student page.</p>
+    </section>
+
+    <section>
+        <h2>2. templates/base.html</h2>
+        <p><strong>base.html</strong> is the general page layout used by other pages. It contains the page header, sidebar, and the layout structure.</p>
+        <h3>Key parts</h3>
+        <p><strong>Template inheritance:</strong></p>
+        <code>{% block content %}{% endblock %}</code>
+        <p>This is a placeholder. Other pages place their own content here.</p>
+        <p><strong>CSS link:</strong></p>
+        <code>&lt;link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"&gt;</code>
+        <p>This loads the stylesheet from the <code>static</code> folder.</p>
+        <p><strong>Navigation links:</strong></p>
+        <code>&lt;a href="{{ url_for('students') }}"&gt;Students&lt;/a&gt;</code>
+        <p>These links use Flask's <code>url_for</code> function so the app generates the correct page address.</p>
+    </section>
+
+    <section>
+        <h2>3. templates/students.html</h2>
+        <p><strong>students.html</strong> is the page where users add, edit, and see student information.</p>
+        <h3>How it works</h3>
+        <p>The page extends <code>base.html</code> and fills the <code>content</code> block with a student form and a table.</p>
+        <h3>Important features</h3>
+        <ul>
+            <li><strong>Form mode:</strong> The page can show either "Add Student" or "Update Student" depending on whether <code>edit_student</code> exists.</li>
+            <li><strong>Form fields:</strong> Name, age, email, phone, and address are sent to the server when the form is submitted.</li>
+            <li><strong>Student table:</strong> Displays all students from the database.</li>
+            <li><strong>Edit link:</strong> Uses <code>?edit_id=...</code> to fill the form with existing student data.</li>
+            <li><strong>Delete button:</strong> Sends a request to remove the student from the database.</li>
+        </ul>
+        <h3>Key template syntax</h3>
+        <p><code>{{ student.name }}</code> prints a value from Python into the HTML.</p>
+        <p><code>{% if edit_student %}</code> is a conditional statement that chooses between add and update mode.</p>
+        <p><code>{% for student in students %}</code> loops through all student records and creates one table row per student.</p>
+    </section>
+
+    <section>
+        <h2>How the files work together</h2>
+        <p>The flow is:</p>
+        <ol>
+            <li>User opens the app in a browser.</li>
+            <li>Flask runs <code>app.py</code>, and the request goes to <code>/students</code>.</li>
+            <li><code>app.py</code> fetches student data from the database.</li>
+            <li><code>students.html</code> shows the student list and form inside the layout from <code>base.html</code>.</li>
+            <li>If the user submits the form, <code>app.py</code> saves the data and redirects back to <code>/students</code>.</li>
+        </ol>
+        <div class="note">
+            <strong>Tip:</strong> You can open this file in a browser to read it like a regular webpage.
+        </div>
+    </section>
+</body>
+</html>
