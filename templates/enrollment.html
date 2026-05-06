@@ -3,41 +3,90 @@
 {% block title %}Manage Enrollment{% endblock %}
 
 {% block content %}
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h3>Enrollment Management</h3>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">Add New Enrollment</button>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+        Add New Enrollment
+    </button>
 </div>
+
+<!-- 🔍 SEARCH -->
+<form method="GET" action="{{ url_for('enrollment_page') }}" class="row g-2 align-items-end mb-4">
+    <div class="col-md-4">
+        <label class="form-label mb-1">Search</label>
+        <input type="search" name="query" class="form-control" placeholder="Search student or course"
+            value="{{ query }}">
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label mb-1">Status</label>
+        <select name="status" class="form-control">
+            <option value="">All</option>
+            <option value="Active" {% if status=='Active' %}selected{% endif %}>Active</option>
+            <option value="Completed" {% if status=='Completed' %}selected{% endif %}>Completed</option>
+            <option value="Dropped" {% if status=='Dropped' %}selected{% endif %}>Dropped</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label mb-1">From</label>
+        <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label mb-1">To</label>
+        <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+    </div>
+
+    <div class="col-md-1 d-grid">
+        <button class="btn btn-outline-primary">Search</button>
+    </div>
+
+    <div class="col-md-1 d-grid">
+        <a href="{{ url_for('enrollment_page') }}" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+<p class="text-muted">Showing {{ start }}–{{ end }} of {{ total }} records</p>
 
 <div class="card-custom">
     <table class="table align-middle">
         <thead>
             <tr>
+                <th><input type="checkbox" id="selectAll"></th>
                 <th>ID</th>
-                <th>Student Name</th>
+                <th>Student</th>
                 <th>Course</th>
                 <th>Status</th>
-                <th>Enrollment Date</th>
+                <th>Date</th>
                 <th class="text-end">Actions</th>
             </tr>
         </thead>
+
         <tbody>
             {% for s in enrollment %}
             <tr>
+                <td><input type="checkbox" class="rowCheckbox" value="{{ s['enrollment_id'] }}"></td>
                 <td>{{ s['enrollment_id'] }}</td>
-                <td><strong>{{ s['student_name'] }}</strong></td>
+                <td>{{ s['student_name'] }}</td>
                 <td>{{ s['course_name'] }}</td>
                 <td>
-                    <span class="status-{{ s['status'] | lower }}">
-                        {{ s['status'] }}
-                    </span>
+                    <span class="status-{{ s['status'] | lower }}">{{ s['status'] }}</span>
                 </td>
                 <td>{{ s['enrollment_date'] }}</td>
+
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
-                        data-bs-target="#edit{{ s['enrollment_id'] }}">Edit</button>
+                        data-bs-target="#edit{{ s['enrollment_id'] }}">
+                        <img src="{{ url_for('static', filename='image/edit.png') }}" style="width:1rem;">
+                    </button>
+
                     <form action="/enrollment/{{ s['enrollment_id'] }}/delete" method="POST" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-danger"
-                            onclick="return confirm('Are you sure?')">Delete</button>
+                        <button type="submit" class="btn btn-sm delete-row-delete-btn"
+                            onclick="return confirm('Are you sure?')">
+                            <img src="{{ url_for('static', filename='image/delete.png') }}" style="width:1rem;">
+                        </button>
                     </form>
                 </td>
             </tr>
@@ -46,115 +95,170 @@
     </table>
 </div>
 
+<!-- PAGINATION (same style) -->
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if page > 1 %}
+        <li class="page-item">
+            <a class="page-link"
+                href="{{ url_for('enrollment_page', query=query, status=status, start_date=start_date, end_date=end_date, page=page-1) }}">
+                Previous
+            </a>
+        </li>
+        {% endif %}
+
+        {% for p in range(1, total_pages + 1) %}
+        <li class="page-item {% if p == page %}active{% endif %}">
+            <a class="page-link"
+                href="{{ url_for('enrollment_page', query=query, status=status, start_date=start_date, end_date=end_date, page=p) }}">
+                {{ p }}
+            </a>
+        </li>
+        {% endfor %}
+
+        {% if page < total_pages %} <li class="page-item">
+            <a class="page-link"
+                href="{{ url_for('enrollment_page', query=query, status=status, start_date=start_date, end_date=end_date, page=page+1) }}">
+                Next
+            </a>
+            </li>
+            {% endif %}
+    </ul>
+</nav>
+
+<!-- BULK DELETE -->
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <small class="text-muted">Total enrollments: {{ total }}</small>
+
+    <form action="/enrollment/delete_selected" method="POST" class="bulk-delete-form"
+        data-field-name="selected_enrollments">
+
+        <button class="btn btn-danger">Delete Selected</button>
+    </form>
+</div>
+
 {% for s in enrollment %}
 <div class="modal fade" id="edit{{ s['enrollment_id'] }}" tabindex="-1">
     <div class="modal-dialog">
         <form action="/enrollment/{{ s['enrollment_id'] }}/update" method="POST" class="modal-content">
+
             <div class="modal-header">
-                <h5>Update enrollment</h5>
+                <h5>Update Enrollment</h5>
             </div>
+
             <div class="modal-body">
-                <input type="hidden" name="enrollment_id" value="{{ s['enrollment_id'] }}">
-                <!-- select student  -->
+                <input type="hidden" name="query" value="{{ query }}">
+                <input type="hidden" name="filter_status" value="{{ status }}">
+                <input type="hidden" name="start_date" value="{{ start_date }}">
+                <input type="hidden" name="end_date" value="{{ end_date }}">
+                <input type="hidden" name="page" value="{{ page }}">
+
                 <div class="mb-3">
-                    <label for="student_id" class="form-label">Student</label>
+                    <label>Student</label>
                     <select name="student_id" class="form-control" required>
-                        <option value="">Select Student</option>
                         {% for student in students %}
-                        <option value="{{ student['student_id'] }}" {% if student['student_id']==s['student_id']
-                            %}selected{% endif %}>
+                        <option value="{{ student['student_id'] }}"
+                            {% if student['student_id']==s['student_id'] %}selected{% endif %}>
                             {{ student['name'] }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
-                <!--  select course -->
+
                 <div class="mb-3">
-                    <label for="course_id" class="form-label">Course</label>
+                    <label>Course</label>
                     <select name="course_id" class="form-control" required>
-                        <option value="">Select Course</option>
                         {% for course in courses %}
-                        <option value="{{ course['course_id'] }}" {% if course['course_id']==s['course_id'] %}selected{%
-                            endif %}>
+                        <option value="{{ course['course_id'] }}"
+                            {% if course['course_id']==s['course_id'] %}selected{% endif %}>
                             {{ course['course_name'] }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
-                <!-- select status -->
+
                 <div class="mb-3">
-                    <label for="status" class="form-label">Status</label>
+                    <label>Status</label>
                     <select name="status" class="form-control" required>
-                        <option value="">Select Status</option>
                         <option value="Active" {% if s['status']=='Active' %}selected{% endif %}>Active</option>
-                        <option value="Completed" {% if s['status']=='Completed' %}selected{% endif %}>Completed
-                        </option>
+                        <option value="Completed" {% if s['status']=='Completed' %}selected{% endif %}>Completed</option>
                         <option value="Dropped" {% if s['status']=='Dropped' %}selected{% endif %}>Dropped</option>
                     </select>
                 </div>
-                <!-- enrollment date -->
+
                 <div class="mb-3">
-                    <label for="enrollment_date" class="form-label">Enrollment Date</label>
-                    <input type="date" name="enrollment_date" class="form-control" value="{{ s['enrollment_date'] }}"
-                        required>
+                    <label>Date</label>
+                    <input type="date" name="enrollment_date"
+                        class="form-control"
+                        value="{{ s['enrollment_date'] or '' }}" required>
                 </div>
+
             </div>
+
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Update</button>
+                <a href="{{ url_for('enrollment_page') }}" class="btn btn-outline-secondary">Cancel</a>
+                <button class="btn btn-primary">Update</button>                
             </div>
+
         </form>
     </div>
 </div>
 {% endfor %}
 
+<!-- ADD MODAL -->
 <div class="modal fade" id="addModal" tabindex="-1">
     <div class="modal-dialog">
         <form action="/enrollment" method="POST" class="modal-content">
             <div class="modal-header">
-                <h5>Add Student Enrollment</h5>
+                <h5>Add Enrollment</h5>
             </div>
+
             <div class="modal-body">
+                <input type="hidden" name="query" value="{{ query }}">
+                <input type="hidden" name="filter_status" value="{{ status }}">
+                <input type="hidden" name="start_date" value="{{ start_date }}">
+                <input type="hidden" name="end_date" value="{{ end_date }}">
+                <input type="hidden" name="page" value="{{ page }}">
+
                 <div class="mb-3">
-                    <label for="student_id" class="form-label">Student</label>
+                    <label>Student</label>
                     <select name="student_id" class="form-control" required>
-                        <option value="">Select Student</option>
                         {% for student in students %}
-                        <option value="{{ student['student_id'] }}">
-                            {{ student['name'] }}
-                        </option>
+                        <option value="{{ student['student_id'] }}">{{ student['name'] }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
                 <div class="mb-3">
-                    <label for="course_id" class="form-label">Course</label>
+                    <label>Course</label>
                     <select name="course_id" class="form-control" required>
-                        <option value="">Select Course</option>
                         {% for course in courses %}
-                        <option value="{{ course['course_id'] }}">
-                            {{ course['course_name'] }}
-                        </option>
+                        <option value="{{ course['course_id'] }}">{{ course['course_name'] }}</option>
                         {% endfor %}
                     </select>
                 </div>
+
                 <div class="mb-3">
-                    <label for="status" class="form-label">Status</label>
+                    <label>Status</label>
                     <select name="status" class="form-control" required>
-                        <option value="">Select Status</option>
                         <option value="Active">Active</option>
                         <option value="Completed">Completed</option>
                         <option value="Dropped">Dropped</option>
                     </select>
                 </div>
+
                 <div class="mb-3">
-                    <label for="enrollment_date" class="form-label">Enrollment Date</label>
+                    <label>Date</label>
                     <input type="date" name="enrollment_date" class="form-control" required>
                 </div>
             </div>
+
             <div class="modal-footer">
-                <button type="submit" class="btn btn-success">Add Enrollment</button>
+                <a href="{{ url_for('enrollment_page') }}" class="btn btn-outline-secondary">Cancel</a>
+                <button class="btn btn-success">Add Enrollment</button>                
             </div>
         </form>
     </div>
 </div>
+
 {% endblock %}

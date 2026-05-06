@@ -1,15 +1,21 @@
 :root {
-    --sidebar-width: 250px;
-    --primary-bg: #f4f7f6;
-    --sidebar-color: #1e293b;
-    --accent-blue: #3b82f6;
-    --text-muted: #94a3b8;
+    --sidebar-width: 280px;
+    --primary-bg: #ffffff;
+    --sidebar-color: #005059;
+    --accent: #7DA78C;
+    --accent-strong: rgb(53, 133, 142);
+    --accent-soft: rgb(53, 133, 142,0.5);
+    --text-muted: rgba(255, 255, 255, 0.85);
+    --text-strong: #f5fffc;
+    --card-bg: #ffffff;
+    --card-border: rgba(53, 133, 142, 0.18);
 }
 
 body {
-    background-color: var(--primary-bg);
+    background: var(--primary-bg);
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #133d3e;
 }
 
 /* SIDEBAR NAVIGATION */
@@ -29,13 +35,13 @@ body {
     font-size: 1.2rem;
     font-weight: 700;
     margin-bottom: 2rem;
-    color: var(--accent-blue);
+    color: var(--text-strong);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
 .nav-link {
-    color: var(--text-muted);
+    color: var(--text-strong);
     text-decoration: none;
     display: block;
     padding: 0.8rem 1rem;
@@ -46,22 +52,171 @@ body {
 
 .nav-link:hover,
 .nav-link.active {
-    background: rgba(59, 130, 246, 0.1);
+    background: var(--accent-strong);
     color: white;
 }
 
 /* MAIN CONTENT CONTAINER */
+/* ---  CORE BUTTON STYLES --- */
+.btn-primary,
+.btn-outline-primary,
+.btn-success {
+    color: #ffffff;
+    background-color: #01606a !important;
+    border-color: #005059 !important;
+}
+
+/* ---  CONSOLIDATED HOVER STATE --- */
+.btn-primary:hover,
+.btn-outline-primary:hover,
+.btn-success:hover {
+    background-color: var(--accent-strong) !important;
+    border-color: var(--accent-strong) !important;
+    color: #ffffff !important;
+}
+
+.d-flex.justify-content-between.align-items-center.mb-4>.btn-primary {
+    min-width: 140px;
+}
+
+/* Global focus reset for accessibility/cleanliness */
+*:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* ---  LAYOUT --- */
 .main-content {
     margin-left: var(--sidebar-width);
     padding: 2rem;
     width: calc(100% - var(--sidebar-width));
+    min-height: 100vh;
+    background: transparent;
 }
 
+/* Delete Button Icon Styles */
+.delete-row-delete-btn {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-row-delete-btn img {
+    width: 25px !important;
+    height: 25px !important;
+}
+
+.delete-row-delete-btn:hover {
+    transform: scale(1.1);
+    background: rgba(161, 15, 15, 0.1) !important;
+    border: none !important;
+}
+
+.btn-danger {
+    background-color: #c03939;
+    border-color: #c03939;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #d94444;
+    /* slightly darker */
+    border-color: #d94444;
+}
+
+/* Edit Button Icon Styles */
+button[data-bs-target^="#edit"] img {
+    width: 25px !important;
+    height: 25px !important;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+button[data-bs-target^="#edit"] {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button[data-bs-target^="#edit"]:hover {
+    background: rgba(63, 157, 167, 0.) !important;
+    border: none !important;
+    transform: scale(1.1);
+}
+
+/* Dashboard Card Styles */
 .card-custom {
-    background: white;
+    background: var(--card-bg);
     border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 30px 50px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--card-border);
+}
+
+.dashboard-card {
+    min-height: 300px;
+    border-radius: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: 5px 5px 20px rgb(1, 96, 106, 0.3);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 5px 5px 20px rgb(1, 96, 106, 0.3);
+}
+
+.dashboard-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--accent-strong);
+    font-size: 2rem;
+    margin-right: 1rem;
+}
+
+.dashboard-card-flex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard-card-title {
+    color: #4c675f;
+    letter-spacing: 0.08em;
+}
+
+.dashboard-card-value {
+    color: #163b37;
+    font-weight: 700;
+}
+
+.card-body .display-5 {
+    font-size: 3rem;
 }
 
 .modal-content {
@@ -88,6 +243,31 @@ input[type="date"] {
     width: 100%;
 }
 
+/* Pagination */
+.pagination .page-link {
+    color: var(--accent-strong);
+    border-color: var(--accent-soft);
+    background-color: transparent;
+}
+
+.pagination .page-link:hover {
+    color: var(--accent-soft);
+    background-color: var(--accent-strong);
+    border-color: var(--accent-strong);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--accent-strong);
+    border-color: var(--accent-strong);
+    color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--accent-soft);
+    background-color: transparent;
+    border-color: var(--accent-soft);
+}
+
 /* Status Colors */
 .status-active {
     background: #d4edda;
@@ -107,9 +287,11 @@ input[type="date"] {
 .status-active,
 .status-completed,
 .status-dropped {
-  display: inline-block;
-  width: 100px;          /* same width for all */
-  text-align: center;    /* center text */
-  padding: 4px 8px;
-  border-radius: 6px;
+    display: inline-block;
+    width: 100px;
+    /* same width for all */
+    text-align: center;
+    /* center text */
+    padding: 4px 8px;
+    border-radius: 6px;
 }

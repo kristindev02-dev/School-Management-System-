@@ -46,14 +46,14 @@ def init_db():
             )
         ''')
 
-        # ENROLLMENTS (NO CASCADE → will show error)
+        # ENROLLMENTS
         c.execute('''
             CREATE TABLE IF NOT EXISTS enrollments (
                 enrollment_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 student_id INTEGER,
                 course_id INTEGER,
                 status TEXT,
-                enrollment_date TEXT,
+                enrollment_date DATE,
                 FOREIGN KEY (student_id) REFERENCES students (student_id),
                 FOREIGN KEY (course_id) REFERENCES courses (course_id)
             )
@@ -74,10 +74,36 @@ def get_connection():
 # STUDENTS
 # ==========================================================
 def get_all_students():
+    students, _ = get_students(page=None, per_page=None)
+    return students
+
+
+def get_students(search_text=None, page=None, per_page=5):
     with get_connection() as conn:
-        return conn.execute(
-            'SELECT * FROM students ORDER BY student_id ASC'
-        ).fetchall()
+        query = 'SELECT * FROM students'
+        count_query = 'SELECT COUNT(*) FROM students'
+        filters = []
+        params = []
+
+        if search_text:
+            filters.append('(name LIKE ? OR address LIKE ?)')
+            params.extend([f'%{search_text}%', f'%{search_text}%'])
+
+        if filters:
+            where_clause = ' WHERE ' + ' AND '.join(filters)
+            query += where_clause
+            count_query += where_clause
+
+        query += ' ORDER BY student_id ASC'
+
+        if page and per_page:
+            offset = (page - 1) * per_page
+            query += f' LIMIT {per_page} OFFSET {offset}'
+
+        results = conn.execute(query, params).fetchall()
+        total = conn.execute(count_query, params).fetchone()[0]
+
+        return results, total
 
 
 def add_student(name, age, date_of_birth, email, address, phone):
@@ -109,10 +135,44 @@ def delete_student(student_id):
 # TEACHERS
 # ==========================================================
 def get_all_teachers():
+    teachers, _ = get_teachers(page=None, per_page=None)
+    return teachers
+
+
+def get_teachers(search_text=None, start_date=None, end_date=None, page=None, per_page=5):
     with get_connection() as conn:
-        return conn.execute(
-            'SELECT * FROM teachers ORDER BY teacher_id ASC'
-        ).fetchall()
+        query = 'SELECT * FROM teachers'
+        count_query = 'SELECT COUNT(*) FROM teachers'
+        filters = []
+        params = []
+
+        if search_text:
+            filters.append('name LIKE ?')
+            params.append(f'%{search_text}%')
+
+        if start_date:
+            filters.append('hire_date >= ?')
+            params.append(start_date)
+
+        if end_date:
+            filters.append('hire_date <= ?')
+            params.append(end_date)
+
+        if filters:
+            where_clause = ' WHERE ' + ' AND '.join(filters)
+            query += where_clause
+            count_query += where_clause
+
+        query += ' ORDER BY teacher_id ASC'
+
+        if page and per_page:
+            offset = (page - 1) * per_page
+            query += f' LIMIT {per_page} OFFSET {offset}'
+
+        results = conn.execute(query, params).fetchall()
+        total = conn.execute(count_query, params).fetchone()[0]
+
+        return results, total
 
 
 def add_teacher(name, email, degree, hire_date):
@@ -144,13 +204,39 @@ def delete_teacher(teacher_id):
 # COURSES
 # ==========================================================
 def get_all_courses():
+    courses, _ = get_courses(page=None, per_page=None)
+    return courses
+
+
+def get_courses(search_text=None, page=1, per_page=5):
     with get_connection() as conn:
-        return conn.execute('''
+        query = '''
             SELECT c.*, t.name as teacher_name, t.degree
             FROM courses c
             LEFT JOIN teachers t ON c.teacher_id = t.teacher_id
-            ORDER BY c.course_id ASC
-        ''').fetchall()
+        '''
+        count_query = 'SELECT COUNT(*) FROM courses c'
+        filters = []
+        params = []
+
+        if search_text:
+            filters.append('(c.course_name LIKE ? OR t.name LIKE ?)')
+            params.extend([f'%{search_text}%', f'%{search_text}%'])
+            count_query += ' LEFT JOIN teachers t ON c.teacher_id = t.teacher_id WHERE ' + ' AND '.join(filters)
+
+        if filters:
+            query += ' WHERE ' + ' AND '.join(filters)
+
+        query += ' ORDER BY c.course_id ASC'
+
+        if page and per_page:
+            offset = (page - 1) * per_page
+            query += f' LIMIT {per_page} OFFSET {offset}'
+
+        results = conn.execute(query, params).fetchall()
+        total = conn.execute(count_query, params).fetchone()[0]
+
+        return results, total
 
 
 def add_course(course_name, teacher_id, credits, description):
@@ -182,14 +268,57 @@ def delete_course(course_id):
 # ENROLLMENTS
 # ==========================================================
 def get_all_enrollments():
+    enrollments, _ = get_enrollments()
+    return enrollments
+
+
+def get_enrollments(search_text=None, status=None, start_date=None, end_date=None, page=1, per_page=5):
     with get_connection() as conn:
-        return conn.execute('''
+        base_query = '''
             SELECT e.*, s.name as student_name, c.course_name
             FROM enrollments e
             LEFT JOIN students s ON e.student_id = s.student_id
             LEFT JOIN courses c ON e.course_id = c.course_id
-            ORDER BY e.enrollment_id ASC
-        ''').fetchall()
+        '''
+        count_query = '''
+            SELECT COUNT(*)
+            FROM enrollments e
+            LEFT JOIN students s ON e.student_id = s.student_id
+            LEFT JOIN courses c ON e.course_id = c.course_id
+        '''
+        filters = []
+        params = []
+
+        if search_text:
+            filters.append('(s.name LIKE ? OR c.course_name LIKE ?)')
+            params.extend([f'%{search_text}%', f'%{search_text}%'])
+
+        if status:
+            filters.append('e.status = ?')
+            params.append(status)
+
+        if start_date:
+            filters.append('e.enrollment_date >= ?')
+            params.append(start_date)
+
+        if end_date:
+            filters.append('e.enrollment_date <= ?')
+            params.append(end_date)
+
+        if filters:
+            where_clause = ' WHERE ' + ' AND '.join(filters)
+            base_query += where_clause
+            count_query += where_clause
+
+        base_query += ' ORDER BY e.enrollment_id ASC'
+        if page and per_page:
+            offset = (page - 1) * per_page
+            base_query += f' LIMIT {per_page} OFFSET {offset}'
+
+        results = conn.execute(base_query, params).fetchall()
+        total = conn.execute(count_query, params).fetchone()[0]
+
+        return results, total
 
 
 def add_enrollment(student_id, course_id, status, enrollment_date):
@@ -215,3 +344,9 @@ def delete_enrollment(enrollment_id):
             'DELETE FROM enrollments WHERE enrollment_id=?',
             (enrollment_id,)
         )
+
+def get_unique_student_count():
+    with get_connection() as conn:
+        # If you don't use DISTINCT, it just counts all rows
+        cursor = conn.execute("SELECT COUNT(DISTINCT student_id) FROM enrollments")
+        return cursor.fetchone()[0]

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 style="color: #35858E; text-transform: uppercase; 
+        font-weight: 800; letter-spacing: 3px;">Dashboard</h2>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="dashboard-card h-100">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
+                <h6 class="card-title dashboard-card-title text-uppercase mb-0">Total Students</h6>
+                <div class="dashboard-card-flex">
+                    <div class="dashboard-card-icon"><i class="bi bi-people-fill"></i></div>
+                    <p class="display-5 dashboard-card-value mb-0">{{ total_students }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="dashboard-card h-100">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
+                <h6 class="card-title dashboard-card-title text-uppercase mb-0">Total Teachers</h6>
+                <div class="dashboard-card-flex">
+                    <div class="dashboard-card-icon"><i class="bi bi-person-badge-fill"></i></div>
+                    <p class="display-5 dashboard-card-value mb-0">{{ total_teachers }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="dashboard-card h-100">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
+                <h6 class="card-title dashboard-card-title text-uppercase mb-0">Total Courses</h6>
+                <div class="dashboard-card-flex">
+                    <div class="dashboard-card-icon"><i class="bi bi-book-fill"></i></div>
+                    <p class="display-5 dashboard-card-value mb-0">{{ total_courses }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="dashboard-card h-100">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
+                <h6 class="card-title dashboard-card-title text-uppercase mb-0">Student Enrollments</h6>
+                <div class="dashboard-card-flex">
+                    <div class="dashboard-card-icon"><i class="bi bi-clipboard-check-fill"></i></div>
+                    <p class="display-5 dashboard-card-value mb-0">{{ unique_total }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
