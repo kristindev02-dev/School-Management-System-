@@ -21,7 +21,11 @@ Solution:
 - One web-based system with clean modules.
 - Validated data input before saving.
 - Structured relational database.
+<<<<<<< HEAD
 - Instant user feedback with toast messages.
+=======
+- Instant user feedback with toast    messages.
+>>>>>>> 35950889794e89cabdb50ae345bcc17bf8edfe5d
 
 ## 3) Tech Stack and Why It Is Used
 
