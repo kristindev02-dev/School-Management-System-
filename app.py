@@ -224,9 +224,9 @@ def delete_selected_students():
                 "danger",
             )
         except sqlite3.OperationalError as e:
-            flash(f"Database error deleting students: {e}", "danger")
+            flash(f"Deletion Failed: Student is still enrolled in a class or program.", "danger")
         except Exception as e:
-            flash(f"Error deleting students: {e}", "danger")
+            flash(f"Deletion Failed: Student is still enrolled in a class or program.", "danger")
     else:
         flash("No students selected for deletion.", "warning")
 
@@ -347,10 +347,10 @@ def remove_teacher(id):
         flash("Teacher deleted successfully!", "success")
 
     except sqlite3.IntegrityError:
-        flash("Cannot delete teacher: assigned to a course.", "danger")
+        flash("Deletion Failed: This teacher is still assigned to active courses.", "danger")
 
     except sqlite3.OperationalError as e:
-        flash(f"Database error: {e}", "danger")
+        flash(f"Deletion Failed: This teacher is still assigned to active courses.", "danger")
 
     return redirect(url_for("teachers_page"))
 
@@ -364,7 +364,7 @@ def delete_selected_teachers():
                 database.delete_teacher(int(teacher_id))
             flash(f"Deleted {len(selected_ids)} teacher(s) successfully!", "success")
         except Exception as e:
-            flash(f"Error deleting teachers: {e}", "danger")
+            flash(f"Deletion Failed: This teacher is still assigned to active courses.", "danger")
     else:
         flash("No teachers selected for deletion.", "warning")
 
@@ -509,7 +509,7 @@ def delete_selected_courses():
                 database.delete_course(int(course_id))
             flash(f"Deleted {len(selected_ids)} course(s) successfully!", "success")
         except Exception as e:
-            flash(f"Error deleting courses: {e}", "danger")
+            flash(f"Deletion Failed: Course cannot be deleted while students are enrolled or teachers are assigned.", "danger")
     else:
         flash("No courses selected for deletion.", "warning")
 
