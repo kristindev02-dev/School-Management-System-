@@ -106,23 +106,29 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" name="course_id" value="{{ s['course_id'] }}">
-                <div class="mb-3"><input type="text" name="name" class="form-control" value="{{ s['course_name'] }}"
-                        placeholder="Course Name" required></div>
                 <div class="mb-3">
+                    <label class="form-label">Course Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control" value="{{ s['course_name'] }}" placeholder="Course Name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Teacher <span class="text-danger">*</span></label>
                     <select name="teacher_id" class="form-control" required>
                         <option value="">Select Teacher</option>
                         {% for teacher in teachers %}
-                        <option value="{{ teacher['teacher_id'] }}" {% if teacher['teacher_id']==s['teacher_id']
-                            %}selected{% endif %}>
+                        <option value="{{ teacher['teacher_id'] }}" {% if teacher['teacher_id']==s['teacher_id'] %}selected{% endif %}>
                             {{ teacher['name'] }} ({{ teacher['degree'] }})
                         </option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="mb-3"><input type="number" name="credits" class="form-control" placeholder="Credits"
-                        value="{{ s['credits'] }}" required></div>
-                <div class="mb-3"><textarea name="description" class="form-control"
-                        placeholder="Description">{{ s['description'] }}</textarea></div>
+                <div class="mb-3">
+                    <label class="form-label">Credits <span class="text-danger">*</span></label>
+                    <input type="number" name="credits" class="form-control" placeholder="Credits" value="{{ s['credits'] }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description <span class="text-danger">*</span></label>
+                    <textarea name="description" class="form-control" placeholder="Description">{{ s['description'] }}</textarea>
+                </div>
             </div>
             <div class="modal-footer">
                 <a href="{{ url_for('courses_page') }}" class="btn btn-outline-secondary">Cancel</a>
@@ -140,9 +146,12 @@
                 <h5>Add course</h5>
             </div>
             <div class="modal-body">
-                <div class="mb-3"><input type="text" name="name" class="form-control" placeholder="Course Name"
-                        required></div>
                 <div class="mb-3">
+                    <label class="form-label">Course Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control" placeholder="Course Name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Teacher <span class="text-danger">*</span></label>
                     <select name="teacher_id" class="form-control" required>
                         <option value="">Select Teacher</option>
                         {% for teacher in teachers %}
@@ -152,10 +161,14 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="mb-3"><input type="number" name="credits" class="form-control" placeholder="Credits"
-                        required></div>
-                <div class="mb-3"><textarea name="description" class="form-control"
-                        placeholder="Description"></textarea></div>
+                <div class="mb-3">
+                    <label class="form-label">Credits <span class="text-danger">*</span></label>
+                    <input type="number" name="credits" class="form-control" placeholder="Credits" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description <span class="text-danger">*</span></label>
+                    <textarea name="description" class="form-control" placeholder="Description"></textarea>
+                </div>
             </div>
             <div class="modal-footer">
                 <a href="{{ url_for('courses_page') }}" class="btn btn-outline-secondary">Cancel</a>
