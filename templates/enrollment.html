@@ -67,7 +67,7 @@
         <tbody>
             {% for s in enrollment %}
             <tr>
-                <td><input type="checkbox" name="selected_enrollments" class="rowCheckbox" value="{{ s['enrollment_id'] }}"></td>
+                <td><input type="checkbox" class="rowCheckbox" value="{{ s['enrollment_id'] }}"></td>
                 <td>{{ s['enrollment_id'] }}</td>
                 <td>{{ s['student_name'] }}</td>
                 <td>{{ s['course_name'] }}</td>
@@ -82,8 +82,9 @@
                         <img src="{{ url_for('static', filename='image/edit.png') }}" style="width:1rem;">
                     </button>
 
-                    <form action="/enrollment/{{ s['enrollment_id'] }}/delete" method="POST" class="d-inline row-delete-form" data-item-name="enrollment {{ s['student_name'] }} / {{ s['course_name'] }}">
-                        <button type="submit" class="btn btn-sm delete-row-delete-btn">
+                    <form action="/enrollment/{{ s['enrollment_id'] }}/delete" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-sm delete-row-delete-btn"
+                            onclick="return confirm('Are you sure?')">
                             <img src="{{ url_for('static', filename='image/delete.png') }}" style="width:1rem;">
                         </button>
                     </form>
@@ -153,10 +154,11 @@
                 <input type="hidden" name="page" value="{{ page }}">
 
                 <div class="mb-3">
-                    <label class="form-label">Student <span class="text-danger">*</span></label>
+                    <label>Student</label>
                     <select name="student_id" class="form-control" required>
                         {% for student in students %}
-                        <option value="{{ student['student_id'] }}" {% if student['student_id']==s['student_id'] %}selected{% endif %}>
+                        <option value="{{ student['student_id'] }}"
+                            {% if student['student_id']==s['student_id'] %}selected{% endif %}>
                             {{ student['name'] }}
                         </option>
                         {% endfor %}
@@ -164,10 +166,11 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Course <span class="text-danger">*</span></label>
+                    <label>Course</label>
                     <select name="course_id" class="form-control" required>
                         {% for course in courses %}
-                        <option value="{{ course['course_id'] }}" {% if course['course_id']==s['course_id'] %}selected{% endif %}>
+                        <option value="{{ course['course_id'] }}"
+                            {% if course['course_id']==s['course_id'] %}selected{% endif %}>
                             {{ course['course_name'] }}
                         </option>
                         {% endfor %}
@@ -175,7 +178,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Status <span class="text-danger">*</span></label>
+                    <label>Status</label>
                     <select name="status" class="form-control" required>
                         <option value="Active" {% if s['status']=='Active' %}selected{% endif %}>Active</option>
                         <option value="Completed" {% if s['status']=='Completed' %}selected{% endif %}>Completed</option>
@@ -184,8 +187,10 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Date <span class="text-danger">*</span></label>
-                    <input type="date" name="enrollment_date" class="form-control" value="{{ s['enrollment_date'] or '' }}" required>
+                    <label>Date</label>
+                    <input type="date" name="enrollment_date"
+                        class="form-control"
+                        value="{{ s['enrollment_date'] or '' }}" required>
                 </div>
 
             </div>
@@ -216,7 +221,7 @@
                 <input type="hidden" name="page" value="{{ page }}">
 
                 <div class="mb-3">
-                    <label class="form-label">Student <span class="text-danger">*</span></label>
+                    <label>Student</label>
                     <select name="student_id" class="form-control" required>
                         {% for student in students %}
                         <option value="{{ student['student_id'] }}">{{ student['name'] }}</option>
@@ -225,7 +230,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Course <span class="text-danger">*</span></label>
+                    <label>Course</label>
                     <select name="course_id" class="form-control" required>
                         {% for course in courses %}
                         <option value="{{ course['course_id'] }}">{{ course['course_name'] }}</option>
@@ -234,7 +239,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Status <span class="text-danger">*</span></label>
+                    <label>Status</label>
                     <select name="status" class="form-control" required>
                         <option value="Active">Active</option>
                         <option value="Completed">Completed</option>
@@ -243,7 +248,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Date <span class="text-danger">*</span></label>
+                    <label>Date</label>
                     <input type="date" name="enrollment_date" class="form-control" required>
                 </div>
             </div>

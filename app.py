@@ -86,6 +86,8 @@ def dashboard_page():
     students, total_students = database.get_students(page=None, per_page=None)
     teachers, total_teachers = database.get_teachers(page=None, per_page=None)
     courses, total_courses = database.get_courses(page=None, per_page=None)
+    enrollments, total_enrollments = database.get_enrollments(page=None, per_page=None) 
+    
     unique_enrollment_count = database.get_unique_student_count()
 
     return render_template(
@@ -222,9 +224,9 @@ def delete_selected_students():
                 "danger",
             )
         except sqlite3.OperationalError as e:
-            flash(f"Deletion Failed: Student is still enrolled in a class or program.", "danger")
+            flash(f"Database error deleting students: {e}", "danger")
         except Exception as e:
-            flash(f"Deletion Failed: Student is still enrolled in a class or program.", "danger")
+            flash(f"Error deleting students: {e}", "danger")
     else:
         flash("No students selected for deletion.", "warning")
 
@@ -345,10 +347,10 @@ def remove_teacher(id):
         flash("Teacher deleted successfully!", "success")
 
     except sqlite3.IntegrityError:
-        flash("Deletion Failed: This teacher is still assigned to active courses.", "danger")
+        flash("Cannot delete teacher: assigned to a course.", "danger")
 
     except sqlite3.OperationalError as e:
-        flash(f"Deletion Failed: This teacher is still assigned to active courses.", "danger")
+        flash(f"Database error: {e}", "danger")
 
     return redirect(url_for("teachers_page"))
 
@@ -362,7 +364,7 @@ def delete_selected_teachers():
                 database.delete_teacher(int(teacher_id))
             flash(f"Deleted {len(selected_ids)} teacher(s) successfully!", "success")
         except Exception as e:
-            flash(f"Deletion Failed: This teacher is still assigned to active courses.", "danger")
+            flash(f"Error deleting teachers: {e}", "danger")
     else:
         flash("No teachers selected for deletion.", "warning")
 
@@ -507,7 +509,7 @@ def delete_selected_courses():
                 database.delete_course(int(course_id))
             flash(f"Deleted {len(selected_ids)} course(s) successfully!", "success")
         except Exception as e:
-            flash(f"Deletion Failed: Course cannot be deleted while students are enrolled or teachers are assigned.", "danger")
+            flash(f"Error deleting courses: {e}", "danger")
     else:
         flash("No courses selected for deletion.", "warning")
 

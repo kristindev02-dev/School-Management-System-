@@ -42,7 +42,7 @@
         <tbody>
             {% for s in students %}
             <tr>
-                <td><input type="checkbox" name="selected_students" class="rowCheckbox" value="{{ s['student_id'] }}"></td>
+                <td><input type="checkbox" class="rowCheckbox" value="{{ s['student_id'] }}"></td>
                 <td>{{ s['student_id'] }}</td>
                 <td>{{ s['name'] }}</td>
                 <td>{{ s['age'] }}</td>
@@ -55,8 +55,9 @@
                         data-bs-target="#edit{{ s['student_id'] }}"><img
                             src="{{ url_for('static', filename='image/edit.png') }}" alt="Edit"
                             style="width: 1rem; height: 1rem;"></button>
-                    <form action="/students/{{ s['student_id'] }}/delete" method="POST" class="d-inline row-delete-form" data-item-name="student {{ s['name'] }}">
-                        <button type="submit" class="btn btn-sm delete-row-delete-btn"><img
+                    <form action="/students/{{ s['student_id'] }}/delete" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-sm delete-row-delete-btn"
+                            onclick="return confirm('Are you sure?')"><img
                                 src="{{ url_for('static', filename='image/delete.png') }}" alt="Delete"
                                 style="width: 1rem; height: 1rem;"></button>
                     </form>
@@ -110,33 +111,37 @@
                 <input type="hidden" name="student_id" value="{{ s['student_id'] }}">
 
                 <div class="mb-3">
-                    <label class="form-label">Name <span class="text-danger">*</span></label>
-                    <input type="text" name="name" class="form-control" value="{{ s['name'] }}" placeholder="Name" required>
+                    <input type="text" name="name" class="form-control" value="{{ s['name'] }}" placeholder="Name"
+                        required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Age <span class="text-danger">*</span></label>
-                    <input type="number" name="age" class="form-control" value="{{ s['age'] }}" placeholder="Age" required>
+                    <input type="number" name="age" class="form-control" value="{{ s['age'] }}" placeholder="Age"
+                        required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Date of Birth <span class="text-danger">*</span></label>
-                    <input type="date" name="date_of_birth" value="{{ s['date_of_birth'][:10] if s['date_of_birth'] else '' }}" class="form-control" placeholder="Date of Birth" required>
+                    <input type="date" name="date_of_birth"
+                        value="{{ s['date_of_birth'][:10] if s['date_of_birth'] else '' }}" placeholder="Date of Birth"
+                        required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Email <span class="text-danger">*</span></label>
-                    <input type="text" name="email" class="form-control" value="{{ s['email'] }}" placeholder="Email (e.g., name@domain.com)" pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" title="Email must have exactly one '@' and exactly one '.' after the '@' (e.g., user@domain.com)" required>
+                    <input type="text" name="email" class="form-control" value="{{ s['email'] }}"
+                        placeholder="Email (e.g., name@domain.com)" pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+                        title="Email must have exactly one '@' and exactly one '.' after the '@' (e.g., user@domain.com)"
+                        required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Phone <span class="text-danger">*</span></label>
-                    <input type="tel" name="phone" class="form-control" value="{{ s['phone'] }}" placeholder="Phone (e.g., 09123456789)" pattern="[0-9]{9,15}" title="Please enter a valid phone number: 09123456789" required>
+                    <input type="tel" name="phone" class="form-control" value="{{ s['phone'] }}"
+                        placeholder="Phone (e.g., 09123456789)" pattern="[0-9]{9,15}"
+                        title="Please enter a valid phone number: 09123456789" required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Address <span class="text-danger">*</span></label>
-                    <input type="text" name="address" class="form-control" value="{{ s['address'] }}" placeholder="Address" required>
+                    <input type="text" name="address" class="form-control" value="{{ s['address'] }}"
+                        placeholder="Address" required>
                 </div>
             </div>
             <div class="modal-footer">
@@ -157,32 +162,31 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">Name <span class="text-danger">*</span></label>
                     <input type="text" name="name" class="form-control" placeholder="Name" required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Age <span class="text-danger">*</span></label>
-                    <input type="number" name="age" class="form-control" placeholder="Age" min="14" title="Age must be greater than 13." required>
+                    <input type="number" name="age" class="form-control" placeholder="Age" min="14"
+                        title="Age must be greater than 13." required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Date of Birth <span class="text-danger">*</span></label>
                     <input type="date" name="date_of_birth" class="form-control" placeholder="Date of Birth" required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Email <span class="text-danger">*</span></label>
-                    <input type="text" name="email" class="form-control" placeholder="Email (e.g., name@domain.com)" pattern="^[^@]+@[^@.]+\.[^@.]+$" title="Email must have exactly one '@' and exactly one '.' after the '@' (e.g., user@domain.com)" required>
+                    <input type="text" name="email" class="form-control" placeholder="Email (e.g., name@domain.com)"
+                        pattern="^[^@]+@[^@.]+\.[^@.]+$"
+                        title="Email must have exactly one '@' and exactly one '.' after the '@' (e.g., user@domain.com)"
+                        required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Phone <span class="text-danger">*</span></label>
-                    <input type="tel" name="phone" class="form-control" placeholder="Phone (e.g., 09123456789)" pattern="[0-9]{9,15}" title="Please enter a valid phone number: 09123456789" required>
+                    <input type="tel" name="phone" class="form-control" placeholder="Phone (e.g., 09123456789)"
+                        pattern="[0-9]{9,15}" title="Please enter a valid phone number: 09123456789" required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Address <span class="text-danger">*</span></label>
                     <input type="text" name="address" class="form-control" placeholder="Address" required>
                 </div>
             </div>
