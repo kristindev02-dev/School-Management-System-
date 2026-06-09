@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
     <div class="sidebar">
@@ -17,22 +19,23 @@
             <a href="/students" class="nav-link {% if request.path == '/students' %}active{% endif %}">Students</a>
             <a href="/teachers" class="nav-link {% if request.path == '/teachers' %}active{% endif %}">Teachers</a>
             <a href="/courses" class="nav-link {% if request.path == '/courses' %}active{% endif %}">Courses</a>
-            <a href="/enrollment" class="nav-link {% if request.path == '/enrollment' %}active{% endif %}">Enrollment</a>
+            <a href="/enrollment"
+                class="nav-link {% if request.path == '/enrollment' %}active{% endif %}">Enrollment</a>
         </nav>
     </div>
 
     <div class="main-content">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-            <div class="container mt-3">
-                {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endfor %}
+        {% if messages %}
+        <div class="container mt-3">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
         {% endwith %}
 
         {% block content %}
@@ -41,21 +44,26 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('form.bulk-delete-form').forEach(function(form) {
-                form.addEventListener('submit', function() {
+        document.addEventListener('DOMContentLoaded', function () {
+            // ==========================================================================
+            // 1. BULK DELETE FORM SUBMISSION LOGIC
+            // ==========================================================================
+            document.querySelectorAll('form.bulk-delete-form').forEach(function (form) {
+                form.addEventListener('submit', function () {
                     const fieldName = form.dataset.fieldName;
                     if (!fieldName) return;
 
-                    form.querySelectorAll('input[name="' + fieldName + '"]').forEach(function(input) {
+                    form.querySelectorAll('input[name="' + fieldName + '"]').forEach(function (input) {
                         input.remove();
                     });
 
-                    const selected = Array.from(document.querySelectorAll('.rowCheckbox:checked')).map(function(cb) {
+                    // Fallback selector: checks for '.row-checkbox', '.rowCheckbox', or any checkbox inside tbody
+                    const selectedBoxes = document.querySelectorAll('.row-checkbox:checked, .rowCheckbox:checked, tbody input[type="checkbox"]:checked');
+                    const selected = Array.from(selectedBoxes).map(function (cb) {
                         return cb.value;
                     });
 
-                    selected.forEach(function(value) {
+                    selected.forEach(function (value) {
                         const hidden = document.createElement('input');
                         hidden.type = 'hidden';
                         hidden.name = fieldName;
@@ -65,22 +73,77 @@
                 });
             });
 
-            const selectAll = document.querySelector('#selectAll');
-            if (selectAll) {
-                selectAll.addEventListener('change', function() {
-                    document.querySelectorAll('.rowCheckbox').forEach(function(cb) {
-                        cb.checked = selectAll.checked;
+            // ==========================================================================
+            // 2. DYNAMIC VISIBILITY & SELECT ALL LOGIC (FIXED)
+            // ==========================================================================
+            const selectAllBox = document.getElementById('selectAll');
+            const deleteBtn = document.getElementById('deleteSelectedBtn') || document.querySelector('form.bulk-delete-form button[type="submit"]');
+
+            // Helper function to safely find all row checkboxes regardless of class name mismatch
+            function getRowCheckboxes() {
+                const boxes = document.querySelectorAll('tbody input[type="checkbox"].rowCheckbox, tbody input[type="checkbox"].row-checkbox, tbody input[type="checkbox"], #selectAll');
+                return Array.from(boxes);
+            }
+
+            // Function to show/hide delete button based on checkbox states
+            function toggleDeleteButton() {
+                if (!deleteBtn) return;
+
+                const rowCheckboxes = getRowCheckboxes();
+                const anyChecked = rowCheckboxes.some(cb => cb.checked);
+
+                // Show button if any are checked, otherwise hide it
+                deleteBtn.style.display = anyChecked ? 'inline-block' : 'none';
+            }
+
+            // Run visibility check on page load
+            toggleDeleteButton();
+
+            // "Select All" Master Checkbox Logic
+            if (selectAllBox) {
+                selectAllBox.addEventListener('change', function () {
+                    const rowCheckboxes = getRowCheckboxes();
+                    rowCheckboxes.forEach(cb => {
+                        cb.checked = this.checked;
                     });
+                    toggleDeleteButton();
                 });
             }
 
-            document.querySelectorAll('.alert-dismissible').forEach(function(alertEl) {
-                setTimeout(function() {
+            // Individual Row Checkbox Logic (Using Event Delegation so it always catches clicks)
+            document.addEventListener('change', function (event) {
+                const rowCheckboxes = getRowCheckboxes();
+
+                // Check if the changed element is one of our row checkboxes
+                if (rowCheckboxes.includes(event.target) && event.target !== selectAllBox) {
+                    if (!selectAllBox) {
+                        toggleDeleteButton();
+                        return;
+                    }
+
+                    if (!event.target.checked) {
+                        selectAllBox.checked = false;
+                    } else {
+                        const allChecked = rowCheckboxes.every(item => item.checked);
+                        selectAllBox.checked = allChecked;
+                    }
+                    toggleDeleteButton();
+                }
+            });
+
+            // ==========================================================================
+            // 3. AUTO-DISMISS ALERTS LOGIC
+            // ==========================================================================
+            document.querySelectorAll('.alert-dismissible').forEach(function (alertEl) {
+                setTimeout(function () {
                     const alert = bootstrap.Alert.getOrCreateInstance(alertEl);
-                    alert.close();
+                    if (alert) {
+                        alert.close();
+                    }
                 }, 4000);
             });
         });
     </script>
 </body>
+
 </html>

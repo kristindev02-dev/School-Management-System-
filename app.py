@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 import re  # ✅ IMPORTANT
 import database
 import sqlite3  # ✅ IMPORTANT
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "secret_key_for_session"
@@ -10,6 +11,66 @@ app.secret_key = "secret_key_for_session"
 # DATABASE INIT
 # ==========================================================
 database.init_db()
+
+
+def validate_student_data(name, age, dob, email, address, phone):
+    if not re.match(r'^[A-Za-z0-9 .-]{2,50}$', name):
+        flash("Enter a valid name (2–50 characters).", "danger")
+        return False
+
+    if not age.isdigit() or not (10 < int(age) <= 100):
+        flash("Age must be a number between 11 and 100.", "danger")
+        return False
+
+    if not dob:
+        flash("Date of birth is required.", "danger")
+        return False
+
+    try:
+        datetime.strptime(dob, "%Y-%m-%d")
+    except ValueError:
+        flash("Enter a valid date of birth.", "danger")
+        return False
+
+    if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
+        flash("Enter a valid email address.", "danger")
+        return False
+
+    if not re.match(r'^\d{7,15}$', phone):
+        flash("Phone must be 7–15 digits", "danger")
+        return False
+
+    if len(address) < 5:
+        flash("Address must be at least 5 characters", "danger")
+        return False
+
+    return True
+
+
+def validate_teacher_data(name, email, degree, hire_date):
+    if not re.match(r'^[A-Za-z0-9 .()\-]{2,50}$', name):
+        flash("Enter a valid name (2–50 characters).", "danger")
+        return False
+
+    if not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email):
+        flash("Enter a valid email address.", "danger")
+        return False
+
+    if len(degree) < 2 or len(degree) > 100:
+        flash("Degree must be 2–100 characters.", "danger")
+        return False
+
+    if not hire_date:
+        flash("Hire date is required.", "danger")
+        return False
+
+    try:
+        datetime.strptime(hire_date, "%Y-%m-%d")
+    except ValueError:
+        flash("Enter a valid hire date.", "danger")
+        return False
+
+    return True
 
 
 # ==========================================================
@@ -53,28 +114,7 @@ def students_page():
             address = request.form.get("address", "").strip()
             phone = request.form.get("phone", "").strip()
 
-            # =========================
-            # VALIDATION
-            # =========================
-
-            if not re.match(r'^[A-Za-z .- 0-9]{2,50}$', name):
-                flash("Enter a valid name (2–50 characters).", "danger")
-                return redirect(url_for("students_page"))
-
-            if not age.isdigit() or not (10 < int(age) <= 100):
-                flash("Age must be greater than 10", "danger")
-                return redirect(url_for("students_page"))
-
-            if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
-                flash("Invalid email format", "danger")
-                return redirect(url_for("students_page"))
-
-            if not re.match(r'^\d{7,15}$', phone):
-                flash("Phone must be 7–15 digits", "danger")
-                return redirect(url_for("students_page"))
-
-            if len(address) < 5:
-                flash("Address must be at least 5 characters", "danger")
+            if not validate_student_data(name, age, dob, email, address, phone):
                 return redirect(url_for("students_page"))
 
             # =========================
@@ -131,33 +171,7 @@ def update_student(student_id):
         address = request.form.get("address", "").strip()
         phone = request.form.get("phone", "").strip()
 
-        # =========================
-        # VALIDATION
-        # =========================
-
-        # Name (allow letters, spaces, dots, hyphens, and numbers)
-        if not re.match(r'^[A-Za-z .- 0-9]{2,50}$', name):
-            flash("Enter a valid name (2–50 characters).", "danger")
-            return redirect(url_for("students_page"))
-
-        # Age
-        if not age.isdigit() or not (10 < int(age) <= 100):
-            flash("Age must be greater than 10", "danger")
-            return redirect(url_for("students_page"))
-
-        # Email
-        if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
-            flash("Enter a valid email address.", "danger")
-            return redirect(url_for("students_page"))
-
-        # Phone
-        if not re.match(r'^\d{7,15}$', phone):
-            flash("Phone must be 7–15 digits", "danger")
-            return redirect(url_for("students_page"))
-
-        # Address
-        if len(address) < 5:
-            flash("Address must be at least 5 characters", "danger")
+        if not validate_student_data(name, age, dob, email, address, phone):
             return redirect(url_for("students_page"))
 
         # =========================
@@ -165,15 +179,15 @@ def update_student(student_id):
         # =========================
         database.update_student(
             student_id,
-            request.form.get("name"),
-            request.form.get("age"),
-            request.form.get("date_of_birth") or None,
-            request.form.get("email"),
-            request.form.get("address"),
-            request.form.get("phone"),
+            name,
+            age,
+            dob or None,
+            email,
+            address,
+            phone,
         )
 
-        flash("Student updated successfully!", "info")
+        flash("Student updated successfully!", "success")
 
     except Exception as e:
         flash(f"Error updating student: {e}", "danger")
@@ -185,7 +199,7 @@ def update_student(student_id):
 def remove_student(id):
     try:
         database.delete_student(id)
-        flash("Student deleted successfully!", "warning")
+        flash("Student deleted successfully!", "success")
 
     except sqlite3.IntegrityError:
         flash("Cannot delete student: enrolled in courses.", "danger")
@@ -203,7 +217,7 @@ def delete_selected_students():
         try:
             for student_id in selected_ids:
                 database.delete_student(int(student_id))
-            flash(f"Deleted {len(selected_ids)} student(s) successfully!", "warning")
+            flash(f"Deleted {len(selected_ids)} student(s) successfully!", "success")
         except sqlite3.IntegrityError:
             flash(
                 "Cannot delete one or more selected students: enrolled in courses.",
@@ -214,7 +228,7 @@ def delete_selected_students():
         except Exception as e:
             flash(f"Error deleting students: {e}", "danger")
     else:
-        flash("No students selected for deletion.", "info")
+        flash("No students selected for deletion.", "warning")
 
     return redirect(url_for("students_page"))
 
@@ -229,34 +243,19 @@ def teachers_page():
             name = request.form.get("name", "").strip()
             email = request.form.get("email", "").strip()
             degree = request.form.get("degree", "").strip()
+            hire_date = request.form.get("hire_date", "").strip()
 
-            # =========================
-            # VALIDATION
-            # =========================
-
-            # Name
-            if not re.match(r'^[A-Za-z0-9 .- ()\]{2,50}$', name):
-                flash("Enter a valid name (2–50 characters).", "warning")
-                return redirect(url_for("teachers_page"))
-
-            # Email
-            if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
-                flash("Enter a valid email address.", "warning")
-                return redirect(url_for("teachers_page"))
-
-            # Degree
-            if len(degree) < 2 or len(degree) > 100:
-                flash("Degree must be 2–100 characters.", "warning")
+            if not validate_teacher_data(name, email, degree, hire_date):
                 return redirect(url_for("teachers_page"))
 
             # =========================
             # ORIGINAL LOGIC (UNCHANGED)
             # =========================
             database.add_teacher(
-                request.form.get("name"),
-                request.form.get("email"),
-                request.form.get("degree"),
-                request.form.get("hire_date") or None,
+                name,
+                email,
+                degree,
+                hire_date,
             )
 
             flash("Teacher added successfully!", "success")
@@ -271,6 +270,20 @@ def teachers_page():
     end_date = request.args.get("end_date", "").strip()
     page = request.args.get("page", 1, type=int)
     per_page = 5
+
+    # Validation for date range
+    if start_date and end_date:
+        try:
+            start = datetime.strptime(start_date, "%Y-%m-%d")
+            end = datetime.strptime(end_date, "%Y-%m-%d")
+            if start > end:
+                flash("Start date must be before or equal to end date.", "danger")
+                start_date = None
+                end_date = None
+        except ValueError:
+            flash("Invalid date format. Use YYYY-MM-DD.", "danger")
+            start_date = None
+            end_date = None
 
     teachers, total = database.get_teachers(
         search_text=query or None,
@@ -304,24 +317,9 @@ def update_teacher(teacher_id):
         name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip()
         degree = request.form.get("degree", "").strip()
+        hire_date = request.form.get("hire_date", "").strip()
 
-        # =========================
-        # VALIDATION
-        # =========================
-
-        # Name (allow (), but no empty ())
-        if not re.match(r'^(?!.*\(\))[A-Za-z0-9 .()\-]{2,50}$', name):
-            flash("Name must be 2–50 characters (no empty ()).", "warning")
-            return redirect(url_for("teachers_page"))
-
-        # Email
-        if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
-            flash("Enter a valid email address.", "warning")
-            return redirect(url_for("teachers_page"))
-
-        # Degree
-        if len(degree) < 2 or len(degree) > 100:
-            flash("Degree must be 2–100 characters.", "warning")
+        if not validate_teacher_data(name, email, degree, hire_date):
             return redirect(url_for("teachers_page"))
 
         # =========================
@@ -329,13 +327,12 @@ def update_teacher(teacher_id):
         # =========================
         database.update_teacher(
             teacher_id,
-            request.form.get("name"),
-            request.form.get("email"),
-            request.form.get("degree"),
-            request.form.get("hire_date"),
+            name,
+            email,
+            degree,
+            hire_date,
         )
-
-        flash("Teacher updated successfully!", "info")
+        flash("Teacher updated successfully!", "success")
 
     except Exception as e:
         flash(f"Error updating teacher: {e}", "danger")
@@ -347,7 +344,7 @@ def update_teacher(teacher_id):
 def remove_teacher(id):
     try:
         database.delete_teacher(id)
-        flash("Teacher deleted successfully!", "warning")
+        flash("Teacher deleted successfully!", "success")
 
     except sqlite3.IntegrityError:
         flash("Cannot delete teacher: assigned to a course.", "danger")
@@ -365,11 +362,11 @@ def delete_selected_teachers():
         try:
             for teacher_id in selected_ids:
                 database.delete_teacher(int(teacher_id))
-            flash(f"Deleted {len(selected_ids)} teacher(s) successfully!", "warning")
+            flash(f"Deleted {len(selected_ids)} teacher(s) successfully!", "success")
         except Exception as e:
             flash(f"Error deleting teachers: {e}", "danger")
     else:
-        flash("No teachers selected for deletion.", "info")
+        flash("No teachers selected for deletion.", "warning")
 
     return redirect(url_for("teachers_page"))
 
@@ -384,19 +381,24 @@ def courses_page():
             name = request.form.get("name", "").strip()
             description = request.form.get("description", "").strip()
 
-            # =========================
-            # VALIDATION
-            # =========================
+            # # =========================
+            # # VALIDATION
+            # # =========================
 
-            # Name
-            if not re.match(r'^[A-Za-z0-9 .()\-]{2,100}$', name):
-                flash("Name must be 2–100 characters.", "warning")
-                return redirect(url_for("courses_page"))
+            # # Name
+            # if not re.match(r'^[A-Za-z0-9 .()\-]{2,100}$', name):
+            #     flash("Name must be 2–100 characters.", "warning")
+            #     return redirect(url_for("courses_page"))
+            
+            # # Credits
+            # if not request.form.get("credits", "").isdigit() or not (1 <= int(request.form.get("credits")) <= 10):
+            #     flash("Credits must be a number between 1 and 10.", "warning")
+            #     return redirect(url_for("courses_page"))
 
-            # Description
-            if len(description) < 5 or len(description) > 255:
-                flash("Description must be 5–255 characters.", "warning")
-                return redirect(url_for("courses_page"))
+            # # Description
+            # if len(description) < 5 or len(description) > 255:
+            #     flash("Description must be 5–255 characters.", "warning")
+            #     return redirect(url_for("courses_page"))
 
             # =========================
             # ORIGINAL LOGIC (UNCHANGED)
@@ -443,20 +445,26 @@ def update_course(course_id):
     try:
         name = request.form.get("name", "").strip()
         description = request.form.get("description", "").strip()
+        credits = request.form.get("credits", "").strip()
 
-        # =========================
-        # VALIDATION
-        # =========================
+        # # =========================
+        # # VALIDATION
+        # # =========================
 
-        # Name
-        if not re.match(r'^[A-Za-z0-9 .()\-]{2,100}$', name):
-            flash("Name must be 2–100 characters.", "warning")
-            return redirect(url_for("courses_page"))
+        # # Name
+        # if not re.match(r'^[A-Za-z0-9 .()\-]{2,100}$', name):
+        #     flash("Name must be 2–100 characters.", "warning")
+        #     return redirect(url_for("courses_page"))
 
-        # Description
-        if len(description) < 5 or len(description) > 255:
-            flash("Description must be 5–255 characters.", "warning")
-            return redirect(url_for("courses_page"))
+        # # Description
+        # if len(description) < 5 or len(description) > 255:
+        #     flash("Description must be 5–255 characters.", "warning")
+        #     return redirect(url_for("courses_page"))
+
+        # # Credits
+        # if not credits.isdigit() or not (1 <= int(credits) <= 10):
+        #     flash("Credits must be a number between 1 and 10.", "warning")
+        #     return redirect(url_for("courses_page"))
 
         # =========================
         # ORIGINAL LOGIC (UNCHANGED)
@@ -469,7 +477,7 @@ def update_course(course_id):
             request.form.get("description"),
         )
 
-        flash("Course updated successfully!", "info")
+        flash("Course updated successfully!", "success")
 
     except Exception as e:
         flash(f"Error updating course: {e}", "danger")
@@ -481,7 +489,7 @@ def update_course(course_id):
 def remove_course(id):
     try:
         database.delete_course(id)
-        flash("Course deleted successfully!", "warning")
+        flash("Course deleted successfully!", "success")
 
     except sqlite3.IntegrityError:
         flash("Cannot delete course: students are enrolled.", "danger")
@@ -499,11 +507,11 @@ def delete_selected_courses():
         try:
             for course_id in selected_ids:
                 database.delete_course(int(course_id))
-            flash(f"Deleted {len(selected_ids)} course(s) successfully!", "warning")
+            flash(f"Deleted {len(selected_ids)} course(s) successfully!", "success")
         except Exception as e:
             flash(f"Error deleting courses: {e}", "danger")
     else:
-        flash("No courses selected for deletion.", "info")
+        flash("No courses selected for deletion.", "warning")
 
     return redirect(url_for("courses_page"))
 
@@ -519,6 +527,20 @@ def enrollment_page():
     end_date = request.args.get("end_date", "").strip()
     page = request.args.get("page", 1, type=int)
     per_page = 5
+
+    # Validation for date range
+    if start_date and end_date:
+        try:
+            start = datetime.strptime(start_date, "%Y-%m-%d")
+            end = datetime.strptime(end_date, "%Y-%m-%d")
+            if start > end:
+                flash("Start date must be before or equal to end date.", "danger")
+                start_date = None
+                end_date = None
+        except ValueError:
+            flash("Invalid date format. Use YYYY-MM-DD.", "danger")
+            start_date = None
+            end_date = None
 
     enrollment, total = database.get_enrollments(
         search_text=search_query or None,
@@ -589,7 +611,7 @@ def update_enrollment(enrollment_id):
             request.form.get("status"),
             request.form.get("enrollment_date") or None,
         )
-        flash("Enrollment updated successfully!", "info")
+        flash("Enrollment updated successfully!", "success")
 
     except Exception as e:
         flash(f"Error updating enrollment: {e}", "danger")
@@ -611,7 +633,7 @@ def update_enrollment(enrollment_id):
 def delete_enrollment(enrollment_id):
     try:
         database.delete_enrollment(enrollment_id)
-        flash("Enrollment deleted successfully!", "warning")
+        flash("Enrollment deleted successfully!", "success")
 
     except Exception as e:
         flash(f"Error deleting enrollment: {e}", "danger")
@@ -626,11 +648,11 @@ def delete_selected_enrollments():
         try:
             for enrollment_id in selected_ids:
                 database.delete_enrollment(int(enrollment_id))
-            flash(f"Deleted {len(selected_ids)} enrollment(s) successfully!", "warning")
+            flash(f"Deleted {len(selected_ids)} enrollment(s) successfully!", "success")
         except Exception as e:
             flash(f"Error deleting enrollments: {e}", "danger")
     else:
-        flash("No enrollments selected for deletion.", "info")
+        flash("No enrollments selected for deletion.", "warning")
 
     return redirect(url_for("enrollment_page"))
 

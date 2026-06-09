@@ -59,6 +59,85 @@ def init_db():
             )
         ''')
 
+        # Reset auto-increment counters for empty tables
+        def reset_sequence(table, pk_name, base_id):
+            c.execute(f'SELECT COUNT(*) FROM {table}')
+            if c.fetchone()[0] == 0:
+                c.execute('DELETE FROM sqlite_sequence WHERE name = ?', (table,))
+                c.execute(f'INSERT OR IGNORE INTO {table} ({pk_name}) VALUES (?)', (base_id,))
+                c.execute(f'DELETE FROM {table} WHERE {pk_name} = ?', (base_id,))
+
+        reset_sequence('students', 'student_id', 1000)
+        reset_sequence('teachers', 'teacher_id', 2000)
+        reset_sequence('courses', 'course_id', 3000)
+        reset_sequence('enrollments', 'enrollment_id', 4000)
+
+        # Seed initial sample data when tables are empty
+        c.execute('SELECT COUNT(*) FROM students')
+        students_count = c.fetchone()[0]
+        c.execute('SELECT COUNT(*) FROM teachers')
+        teachers_count = c.fetchone()[0]
+        c.execute('SELECT COUNT(*) FROM courses')
+        courses_count = c.fetchone()[0]
+        c.execute('SELECT COUNT(*) FROM enrollments')
+        enrollments_count = c.fetchone()[0]
+
+        if (
+            students_count == 0
+            and teachers_count == 0
+            and courses_count == 0
+            and enrollments_count == 0
+        ):
+            teacher_rows = [
+                ('Alice Roberts', 'alice.roberts@example.com', 'Mathematics', '2022-08-15'),
+                ('Brian Chen', 'brian.chen@example.com', 'Physics', '2021-09-01'),
+                ('Clara Patel', 'clara.patel@example.com', 'English Literature', '2023-01-10'),
+            ]
+            teacher_ids = []
+            for name, email, degree, hire_date in teacher_rows:
+                c.execute(
+                    'INSERT INTO teachers (name, email, degree, hire_date) VALUES (?, ?, ?, ?)',
+                    (name, email, degree, hire_date),
+                )
+                teacher_ids.append(c.lastrowid)
+
+            student_rows = [
+                ('Mia Suzuki', 15, '2008-04-20', 'mia.suzuki@example.com', '123 Sakura St.', '09012345678'),
+                ('Noah Tanaka', 17, '2006-11-05', 'noah.tanaka@example.com', '456 Maple Ave.', '08023456789'),
+                ('Emma Yamamoto', 16, '2007-07-18', 'emma.yamamoto@example.com', '789 Cherry Rd.', '07034567890'),
+            ]
+            student_ids = []
+            for name, age, dob, email, address, phone in student_rows:
+                c.execute(
+                    'INSERT INTO students (name, age, date_of_birth, email, address, phone) VALUES (?, ?, ?, ?, ?, ?)',
+                    (name, age, dob, email, address, phone),
+                )
+                student_ids.append(c.lastrowid)
+
+            course_rows = [
+                ('Algebra I', teacher_ids[0], 4, 'Fundamentals of algebra and problem solving'),
+                ('Physics I', teacher_ids[1], 3, 'Mechanics, motion, and energy'),
+                ('English Composition', teacher_ids[2], 3, 'Writing, reading, and literary analysis'),
+            ]
+            course_ids = []
+            for course_name, teacher_id, credits, description in course_rows:
+                c.execute(
+                    'INSERT INTO courses (course_name, teacher_id, credits, description) VALUES (?, ?, ?, ?)',
+                    (course_name, teacher_id, credits, description),
+                )
+                course_ids.append(c.lastrowid)
+
+            enrollment_rows = [
+                (student_ids[0], course_ids[0], 'Active', '2024-09-01'),
+                (student_ids[1], course_ids[1], 'Active', '2024-09-02'),
+                (student_ids[2], course_ids[2], 'Completed', '2024-02-15'),
+            ]
+            for student_id, course_id, status, enrollment_date in enrollment_rows:
+                c.execute(
+                    'INSERT INTO enrollments (student_id, course_id, status, enrollment_date) VALUES (?, ?, ?, ?)',
+                    (student_id, course_id, status, enrollment_date),
+                )
+
 
 # ==========================================================
 # CONNECTION

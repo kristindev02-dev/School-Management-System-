@@ -55,9 +55,9 @@
         <thead>
             <tr>
                 <th><input type="checkbox" id="selectAll"></th>
-                <th>ID</th>
-                <th>Student</th>
-                <th>Course</th>
+                <th>Enrollment ID</th>
+                <th>Student Name</th>
+                <th>Course Name</th>
                 <th>Status</th>
                 <th>Date</th>
                 <th class="text-end">Actions</th>
@@ -95,6 +95,7 @@
     </table>
 </div>
 
+{% if total_pages > 1 %}
 <!-- PAGINATION (same style) -->
 <nav>
     <ul class="pagination justify-content-center">
@@ -125,15 +126,14 @@
             {% endif %}
     </ul>
 </nav>
+{% endif %}
 
 <!-- BULK DELETE -->
 <div class="d-flex justify-content-between align-items-center mt-3">
     <small class="text-muted">Total enrollments: {{ total }}</small>
 
-    <form action="/enrollment/delete_selected" method="POST" class="bulk-delete-form"
-        data-field-name="selected_enrollments">
-
-        <button class="btn btn-danger">Delete Selected</button>
+    <form action="/enrollment/delete_selected" method="POST" class="bulk-delete-form" data-field-name="selected_enrollments">
+        <button type="submit" class="btn btn-danger" id="deleteSelectedBtn">Delete Selected</button>
     </form>
 </div>
 

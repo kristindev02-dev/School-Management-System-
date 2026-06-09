@@ -37,7 +37,7 @@
         <thead>
             <tr>
                 <th><input type="checkbox" id="selectAll"></th>
-                <th>ID</th>
+                <th>Teacher ID</th>
                 <th>Teacher Name</th>
                 <th>Email</th>
                 <th>Degree/Qualification</th>
@@ -50,7 +50,7 @@
             <tr>
                 <td><input type="checkbox" class="rowCheckbox" value="{{ s['teacher_id'] }}"></td>
                 <td>{{ s['teacher_id'] }}</td>
-                <td><strong>{{ s['name'] }}</strong></td>
+                <td>{{ s['name'] }}</td>
                 <td>{{ s['email'] }}</td>
                 <td>{{ s['degree'] }}</td>
                 <td>{{ s['hire_date'] }}</td>
@@ -72,6 +72,7 @@
     </table>
 </div>
 
+{% if total_pages > 1 %}
 <nav aria-label="Teacher pagination">
     <ul class="pagination justify-content-center">
         {% if page > 1 %}
@@ -96,18 +97,19 @@
             {% endif %}
     </ul>
 </nav>
+{% endif %}
 
 <div class="d-flex justify-content-between align-items-center mt-3">
     <small class="text-muted">Total teachers: {{ total }}</small>
     <form action="/teachers/delete_selected" method="POST" class="bulk-delete-form" data-field-name="selected_teachers">
-        <button type="submit" class="btn btn-danger">Delete Selected</button>
+        <button type="submit" class="btn btn-danger" id="deleteSelectedBtn">Delete Selected</button>
     </form>
 </div>
 
 {% for s in teachers %}
 <div class="modal fade" id="edit{{ s['teacher_id'] }}" tabindex="-1">
     <div class="modal-dialog">
-        <form action="/teachers/{{ s['teacher_id'] }}/update" method="POST" class="modal-content">
+        <form action="{{ url_for('update_teacher', teacher_id=s['teacher_id']) }}" method="POST" class="modal-content">
             <div class="modal-header">
                 <h5>Update teacher</h5>
             </div>
@@ -115,7 +117,7 @@
                 <input type="hidden" name="teacher_id" value="{{ s['teacher_id'] }}">
                 <div class="mb-3"><input type="text" name="name" class="form-control" value="{{ s['name'] }}" placeholder="Name" required>
                 </div>
-                <div class="mb-3"><input type="email" name="email" class="form-control" value="{{ s['email'] }}" placeholder="Email" required></div>
+                <div class="mb-3"><input type="email" name="email" class="form-control" value="{{ s['email'] }}" placeholder="Email" required pattern="^[^@]+@[^@.]+\.[^@.]+$" title="Enter a valid email address."></div>
                 <div class="mb-3"><input type="text" name="degree" class="form-control" value="{{ s['degree'] }}"
                         placeholder="Degree/qualification" required></div>
                 <div class="mb-3"><input type="date" name="hire_date" class="form-control" value="{{ s['hire_date'] }}"
@@ -138,7 +140,7 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3"><input type="text" name="name" class="form-control" placeholder="Name" required></div>
-                <div class="mb-3"><input type="email" name="email" class="form-control" placeholder="Email" required></div>
+                <div class="mb-3"><input type="email" name="email" class="form-control" placeholder="Email" required pattern="^[^@]+@[^@.]+\.[^@.]+$" title="Enter a valid email address."></div>
                 <div class="mb-3"><input type="text" name="degree" class="form-control"
                         placeholder="Degree/qualification" required> </div>
                 <div class="mb-3"><input type="date" name="hire_date" class="form-control" placeholder="Hire Date"

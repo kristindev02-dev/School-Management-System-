@@ -251,7 +251,7 @@ input[type="date"] {
 }
 
 .pagination .page-link:hover {
-    color: var(--accent-soft);
+    color: white;
     background-color: var(--accent-strong);
     border-color: var(--accent-strong);
 }
@@ -266,6 +266,11 @@ input[type="date"] {
     color: var(--accent-soft);
     background-color: transparent;
     border-color: var(--accent-soft);
+}
+
+/* Add space above pagination */
+.pagination {
+    margin-top: 1rem;
 }
 
 /* Status Colors */
