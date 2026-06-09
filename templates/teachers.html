@@ -48,7 +48,7 @@
         <tbody>
             {% for s in teachers %}
             <tr>
-                <td><input type="checkbox" class="rowCheckbox" value="{{ s['teacher_id'] }}"></td>
+                <td><input type="checkbox" name="selected_teachers" class="rowCheckbox" value="{{ s['teacher_id'] }}"></td>
                 <td>{{ s['teacher_id'] }}</td>
                 <td>{{ s['name'] }}</td>
                 <td>{{ s['email'] }}</td>
@@ -114,13 +114,22 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" name="teacher_id" value="{{ s['teacher_id'] }}">
-                <div class="mb-3"><input type="text" name="name" class="form-control" value="{{ s['name'] }}" placeholder="Name" required>
+                <div class="mb-3">
+                    <label class="form-label">Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control" value="{{ s['name'] }}" placeholder="Name" required>
                 </div>
-                <div class="mb-3"><input type="email" name="email" class="form-control" value="{{ s['email'] }}" placeholder="Email" required pattern="^[^@]+@[^@.]+\.[^@.]+$" title="Enter a valid email address."></div>
-                <div class="mb-3"><input type="text" name="degree" class="form-control" value="{{ s['degree'] }}"
-                        placeholder="Degree/qualification" required></div>
-                <div class="mb-3"><input type="date" name="hire_date" class="form-control" value="{{ s['hire_date'] }}"
-                        placeholder="Hire Date" required></div>
+                <div class="mb-3">
+                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                    <input type="email" name="email" class="form-control" value="{{ s['email'] }}" placeholder="Email" required pattern="^[^@]+@[^@.]+\.[^@.]+$" title="Enter a valid email address.">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Degree/Qualification <span class="text-danger">*</span></label>
+                    <input type="text" name="degree" class="form-control" value="{{ s['degree'] }}" placeholder="Degree/qualification" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Hire Date <span class="text-danger">*</span></label>
+                    <input type="date" name="hire_date" class="form-control" value="{{ s['hire_date'] }}" placeholder="Hire Date" required>
+                </div>
             </div>
             <div class="modal-footer">
                 <a href="{{ url_for('teachers_page') }}" class="btn btn-outline-secondary">Cancel</a>
@@ -138,12 +147,22 @@
                 <h5>Add teacher</h5>
             </div>
             <div class="modal-body">
-                <div class="mb-3"><input type="text" name="name" class="form-control" placeholder="Name" required></div>
-                <div class="mb-3"><input type="email" name="email" class="form-control" placeholder="Email" required pattern="^[^@]+@[^@.]+\.[^@.]+$" title="Enter a valid email address."></div>
-                <div class="mb-3"><input type="text" name="degree" class="form-control"
-                        placeholder="Degree/qualification" required> </div>
-                <div class="mb-3"><input type="date" name="hire_date" class="form-control" placeholder="Hire Date"
-                        required></div>
+                <div class="mb-3">
+                    <label class="form-label">Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control" placeholder="Name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                    <input type="email" name="email" class="form-control" placeholder="Email" required pattern="^[^@]+@[^@.]+\.[^@.]+$" title="Enter a valid email address.">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Degree/Qualification <span class="text-danger">*</span></label>
+                    <input type="text" name="degree" class="form-control" placeholder="Degree/qualification" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Hire Date <span class="text-danger">*</span></label>
+                    <input type="date" name="hire_date" class="form-control" placeholder="Hire Date" required>
+                </div>
             </div>
             <div class="modal-footer">
                 <a href="{{ url_for('teachers_page') }}" class="btn btn-outline-secondary">Cancel</a>

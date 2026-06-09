@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -19,24 +19,27 @@
             <a href="/students" class="nav-link {% if request.path == '/students' %}active{% endif %}">Students</a>
             <a href="/teachers" class="nav-link {% if request.path == '/teachers' %}active{% endif %}">Teachers</a>
             <a href="/courses" class="nav-link {% if request.path == '/courses' %}active{% endif %}">Courses</a>
-            <a href="/enrollment"
-                class="nav-link {% if request.path == '/enrollment' %}active{% endif %}">Enrollment</a>
+            <a href="/enrollment" class="nav-link {% if request.path == '/enrollment' %}active{% endif %}">Enrollment</a>
         </nav>
     </div>
 
     <div class="main-content">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <div class="container mt-3">
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
             {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="toast align-items-center text-white bg-{{ category }} border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ message }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
             </div>
             {% endfor %}
+            {% endif %}
+            {% endwith %}
         </div>
-        {% endif %}
-        {% endwith %}
 
         {% block content %}
         {% endblock %}
@@ -57,7 +60,6 @@
                         input.remove();
                     });
 
-                    // Fallback selector: checks for '.row-checkbox', '.rowCheckbox', or any checkbox inside tbody
                     const selectedBoxes = document.querySelectorAll('.row-checkbox:checked, .rowCheckbox:checked, tbody input[type="checkbox"]:checked');
                     const selected = Array.from(selectedBoxes).map(function (cb) {
                         return cb.value;
@@ -74,32 +76,26 @@
             });
 
             // ==========================================================================
-            // 2. DYNAMIC VISIBILITY & SELECT ALL LOGIC (FIXED)
+            // 2. DYNAMIC VISIBILITY & SELECT ALL LOGIC
             // ==========================================================================
             const selectAllBox = document.getElementById('selectAll');
             const deleteBtn = document.getElementById('deleteSelectedBtn') || document.querySelector('form.bulk-delete-form button[type="submit"]');
 
-            // Helper function to safely find all row checkboxes regardless of class name mismatch
             function getRowCheckboxes() {
-                const boxes = document.querySelectorAll('tbody input[type="checkbox"].rowCheckbox, tbody input[type="checkbox"].row-checkbox, tbody input[type="checkbox"], #selectAll');
+                const boxes = document.querySelectorAll('tbody input[type="checkbox"].rowCheckbox, tbody input[type="checkbox"].row-checkbox');
                 return Array.from(boxes);
             }
 
-            // Function to show/hide delete button based on checkbox states
             function toggleDeleteButton() {
                 if (!deleteBtn) return;
 
                 const rowCheckboxes = getRowCheckboxes();
                 const anyChecked = rowCheckboxes.some(cb => cb.checked);
-
-                // Show button if any are checked, otherwise hide it
                 deleteBtn.style.display = anyChecked ? 'inline-block' : 'none';
             }
 
-            // Run visibility check on page load
             toggleDeleteButton();
 
-            // "Select All" Master Checkbox Logic
             if (selectAllBox) {
                 selectAllBox.addEventListener('change', function () {
                     const rowCheckboxes = getRowCheckboxes();
@@ -110,11 +106,8 @@
                 });
             }
 
-            // Individual Row Checkbox Logic (Using Event Delegation so it always catches clicks)
             document.addEventListener('change', function (event) {
                 const rowCheckboxes = getRowCheckboxes();
-
-                // Check if the changed element is one of our row checkboxes
                 if (rowCheckboxes.includes(event.target) && event.target !== selectAllBox) {
                     if (!selectAllBox) {
                         toggleDeleteButton();
@@ -133,7 +126,7 @@
 
             // ==========================================================================
             // 3. ROW DELETE CONFIRMATION MODAL
-            // ======================================================================
+            // ==========================================================================
             let deleteFormToSubmit = null;
             const confirmDeleteModalEl = document.getElementById('confirmDeleteModal');
             const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -162,16 +155,12 @@
                 });
             }
 
-            // ======================================================================
-            // 4. AUTO-DISMISS ALERTS LOGIC
-            // ======================================================================
-            document.querySelectorAll('.alert-dismissible').forEach(function (alertEl) {
-                setTimeout(function () {
-                    const alert = bootstrap.Alert.getOrCreateInstance(alertEl);
-                    if (alert) {
-                        alert.close();
-                    }
-                }, 4000);
+            // ==========================================================================
+            // 4. INITIALIZE AND SHOW TOAST NOTIFICATIONS
+            // ==========================================================================
+            document.querySelectorAll('.toast').forEach(function (toastEl) {
+                const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 4000 });
+                toast.show();
             });
         });
     </script>
@@ -193,6 +182,7 @@
             </div>
         </div>
     </div>
+
 </body>
 
 </html>

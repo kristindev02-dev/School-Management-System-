@@ -86,8 +86,6 @@ def dashboard_page():
     students, total_students = database.get_students(page=None, per_page=None)
     teachers, total_teachers = database.get_teachers(page=None, per_page=None)
     courses, total_courses = database.get_courses(page=None, per_page=None)
-    enrollments, total_enrollments = database.get_enrollments(page=None, per_page=None) 
-    
     unique_enrollment_count = database.get_unique_student_count()
 
     return render_template(
