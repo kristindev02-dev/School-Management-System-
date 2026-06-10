@@ -59,9 +59,8 @@
                         data-bs-target="#edit{{ s['teacher_id'] }}"><img
                             src="{{ url_for('static', filename='image/edit.png') }}" alt="Edit"
                             style="width: 1rem; height: 1rem;"></button>
-                    <form action="/teachers/{{ s['teacher_id'] }}/delete" method="POST" class="d-inline">
-                        <button type="submit" class="btn btn-sm delete-row-delete-btn"
-                            onclick="return confirm('Are you sure?')"><img
+                    <form action="/teachers/{{ s['teacher_id'] }}/delete" method="POST" class="d-inline row-delete-form" data-item-name="teacher {{ s['name'] }}">
+                        <button type="submit" class="btn btn-sm delete-row-delete-btn"><img
                                 src="{{ url_for('static', filename='image/delete.png') }}" alt="Delete"
                                 style="width: 1rem; height: 1rem;"></button>
                     </form>
