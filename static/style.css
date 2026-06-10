@@ -270,7 +270,7 @@ input[type="date"] {
 
 /* Add space above pagination */
 .pagination {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
 }
 
 /* Status Colors */
