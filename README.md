@@ -2,13 +2,9 @@
 
 ## Setup
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/kristindev02-dev/School-Management-System-.git
-cd School-Management-System-
-```
 
-### 2. Create a virtual environment
+
+### 1. Create a virtual environment
 ```bash
 python -m venv venv
 ```
@@ -25,7 +21,7 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-### 3. Install dependencies
+### 2. Install dependencies
 Install Flask:
 ```bash
 pip install flask
@@ -36,24 +32,24 @@ If you later add a `requirements.txt` file, you can use:
 pip install -r requirements.txt
 ```
 
-### 4. Set up the database
+### 3. Set up the database
 This project uses SQLite, so no separate database server is required.
 
 - Make sure the database file is created automatically when the app runs, or
 - If the project includes SQL setup logic, run the app once to initialize the tables
 
-### 5. Configure the project
+### 4. Configure the project
 Before running, check the Python files for settings such as:
 - database file path
 - debug mode
 - host and port
 
-### 6. Run the project
+### 5. Run the project
 ```bash
 python app.py
 ```
 
-### 7. Open in browser
+### 6. Open in browser
 After the server starts, open:
 ```bash
 http://127.0.0.1:5000
